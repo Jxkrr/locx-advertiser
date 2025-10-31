@@ -69,8 +69,8 @@ local MESSAGES = {
     "clips, trades & ranked talk → "..DISCORD_VANITY.." | by @5vqr"
 }
 
-local MIN_DELAY = 1.3
-local MAX_DELAY = 2.9
+local MIN_DELAY = 2.1
+local MAX_DELAY = 5.3
 
 -- Auto find chat channel
 local function getChannel()
