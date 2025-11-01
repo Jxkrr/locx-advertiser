@@ -101,7 +101,7 @@ local function serverHop()
     pcall(function()
         CoreGui:SetCore("SendNotification", {
             Title = "RSO Hop",
-            Text = "10 mins up — Hopping to MVS DUELS...",
+            Text = "1 mins up — Hopping to MVS DUELS...",
             Duration = 4
         })
     end)
