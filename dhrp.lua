@@ -10,7 +10,7 @@ local CoreGui = game:GetService("StarterGui")
 -- Notify
 pcall(function()
     CoreGui:SetCore("SendNotification", {
-        Title = "RSO DHRP",
+        Title = "RSO COM",
         Text = "Spamming 10 mins → Hop → Repeat",
         Duration = 6
     })
