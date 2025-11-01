@@ -77,7 +77,7 @@ local MESSAGES = {
 local MIN_DELAY = 2.1
 local MAX_DELAY = 5.3
 local SPAM_DURATION = 60  -- 1 minute
-local PLACE_ID = 12355337193  -- Murderers VS Sheriffs: DUELS
+local PLACE_ID = 82018751001830  -- DHRP
 
 -- Auto find chat channel
 local function getChannel()
