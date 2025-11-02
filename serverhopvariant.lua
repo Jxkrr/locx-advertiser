@@ -1,6 +1,5 @@
--- [ RSO SPAM + AUTO SERVER HOP FOR MVS DUELS ]
--- Game: https://www.roblox.com/games/12355337193/
--- Vanity: /locx | by @5vqr | Hops every 10 mins
+-- [ RSO SPAM + JOIN FULLER SERVERS (80%+) + AUTO HOP ]
+-- Game: MVS DUELS | Vanity: /locx | by @5vqr
 
 local TextChatService = game:GetService("TextChatService")
 local TeleportService = game:GetService("TeleportService")
@@ -10,8 +9,8 @@ local CoreGui = game:GetService("StarterGui")
 -- Notify
 pcall(function()
     CoreGui:SetCore("SendNotification", {
-        Title = "RSO MVS DUELS",
-        Text = "Spamming 10 mins → Hop → Repeat",
+        Title = "RSO Full Server",
+        Text = "Hopping to 80%+ full servers every 10 mins",
         Duration = 6
     })
 end)
@@ -74,8 +73,9 @@ local MESSAGES = {
 
 local MIN_DELAY = 2.1
 local MAX_DELAY = 5.3
-local SPAM_DURATION = 60  -- 1 minute
-local PLACE_ID = 12355337193  -- Murderers VS Sheriffs: DUELS
+local SPAM_DURATION = 60  -- 1 minutes
+local PLACE_ID = 12355337193
+local MIN_FILL_PERCENT = 0.8  -- 80%+ full
 
 -- Auto find chat channel
 local function getChannel()
@@ -94,17 +94,17 @@ local ChatChannel = getChannel()
 local Spamming = true
 local SpamTask = nil
 
--- ========== SERVER HOP (ONLY MVS DUELS) ==========
+-- ========== SERVER HOP TO FULLER SERVERS ==========
 local function serverHop()
     pcall(function()
         CoreGui:SetCore("SendNotification", {
             Title = "RSO Hop",
-            Text = "10 mins up — Hopping to MVS DUELS...",
+            Text = "Finding 80%+ full server...",
             Duration = 4
         })
     end)
 
-    local url = "https://games.roblox.com/v1/games/"..PLACE_ID.."/servers/Public?sortOrder=Asc&limit=100"
+    local url = "https://games.roblox.com/v1/games/"..PLACE_ID.."/servers/Public?sortOrder=Desc&limit=100"
     local success, servers = pcall(function()
         return HttpService:JSONDecode(game:HttpGet(url))
     end)
@@ -114,21 +114,45 @@ local function serverHop()
         return
     end
 
-    local validServers = {}
+    local candidates = {}
     for _, v in pairs(servers.data) do
-        if v.playing < v.maxPlayers and v.id ~= game.JobId then
-            table.insert(validServers, v.id)
+        if v.id ~= game.JobId and v.playing < v.maxPlayers then
+            local fillRatio = v.playing / v.maxPlayers
+            if fillRatio >= MIN_FILL_PERCENT then
+                table.insert(candidates, {id = v.id, fill = fillRatio, playing = v.playing})
+            end
         end
     end
 
-    if #validServers > 0 then
-        TeleportService:TeleportToPlaceInstance(PLACE_ID, validServers[math.random(#validServers)])
+    if #candidates > 0 then
+        -- Sort by most full
+        table.sort(candidates, function(a, b) return a.fill > b.fill end)
+        local target = candidates[1].id
+        pcall(function()
+            CoreGui:SetCore("SendNotification", {
+                Title = "RSO Hop",
+                Text = "Joining full server ("..candidates[1].playing.."/"..(candidates[1].playing / candidates[1].fill)..")",
+                Duration = 3
+            })
+        end)
+        TeleportService:TeleportToPlaceInstance(PLACE_ID, target)
     else
-        TeleportService:Teleport(PLACE_ID)
+        -- Fallback: random non-empty
+        local fallback = {}
+        for _, v in pairs(servers.data) do
+            if v.id ~= game.JobId and v.playing > 0 and v.playing < v.maxPlayers then
+                table.insert(fallback, v.id)
+            end
+        end
+        if #fallback > 0 then
+            TeleportService:TeleportToPlaceInstance(PLACE_ID, fallback[math.random(#fallback)])
+        else
+            TeleportService:Teleport(PLACE_ID)
+        end
     end
 end
 
--- ========== SPAM LOOP WITH HOP ==========
+-- ========== SPAM LOOP ==========
 local function startSpam()
     if SpamTask then return end
     SpamTask = task.spawn(function()
@@ -189,5 +213,5 @@ StopButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- ========== START ON LOAD ==========
+-- START
 startSpam()
